@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const{ MongoClient } = require('mongodb')
 var ObjectId = require('mongodb').ObjectId; 
+var md5 = require('md5')
 
 const uri = "mongodb://localhost:27017/shop"
 const client = new MongoClient(uri)
@@ -16,12 +17,83 @@ app.use(cors())
 app.use(express.urlencoded( { extended: false } ))
 app.use(express.json())
 
-async function insertToDatabase(req , res , collection) {
+function ControlObject( object1 , object2 , object3 , object4 ) {
+    let cond = null
+ 
+    if(object1 === object3 && object2 === object4){
+        cond = true
+    } else {
+        cond = false
+    }
 
+    return(cond)
+}
+
+async function insertUsers(req , res) {
+    let control = false
+
+    let users = []
+    try {
+
+        await client.connect()
+
+        let { username , password } = req.body
+
+        password = md5(password)
+
+        users =  utenti.find( { } )
+
+        users = await users.toArray()
+
+        for(let i in users ){
+            control = ControlObject(username , password , users[i].username , users[i].password)
+            if(control == true){
+                break
+            }
+        }
+        
+        if(control == false) {
+            await utenti.insertOne( { username: username , password: password } )
+            res.send('Utente insert to Database')
+        }
+        else {
+            res.send('Utente already exist')
+        }
+
+
+    } finally {
+        await client.close();
+    }
+}
+
+async function insertCarello(req , res) {
+
+    let control = false
+    let carts = []
+    let cart = { }
     try {
         await client.connect();
 
-        result =  await collection.insertOne(req.body)
+        let { idUtente , idMobile } = req.body
+
+        carts =  carello.find( {  } )
+
+        carts = await carts.toArray()
+
+
+        for(let i in carts ){
+            control = ControlObject(idUtente , idMobile , carts[i].idUtente , carts[i].idMobile)
+
+            if(control === true) {
+                cart = { idUtente: idUtente , idMobile: idMobile , quantita: carts[i].quantita + req.body.quantita }
+                await carello.deleteMany( carts[i] )
+                await carello.insertOne( cart )
+            }
+        }
+
+        if(control === false) {
+            await carello.insertOne( req.body )
+        }
 
     } finally {
 
@@ -33,25 +105,28 @@ async function insertToDatabase(req , res , collection) {
 async function ControlLogin(req , res){
 
     let result = false
-    let users = []
+    let users = { }
     try {
         await client.connect();
 
-        const query = { username: req.body.username, pasword: req.body.password}
-        const collection = utenti.find(query)
+        const query = { username: req.body.username, password: md5(req.body.password) }
+        users = await utenti.findOne( query )
 
-        users = await collection.toArray()
-
-        if(users.length == 0){
+        if(users === null) {
             result = false
-        }else {
+        } else {
             result = true
         }
 
 
     } finally {
         await client.close();
-        res.send("Presente: " + result)
+        if (result === true){
+            res.send('Welcome to Project z')
+        } else {
+            res.status(400).send('Users is not registered')
+        }
+
         console.log(users)
     }
 }
@@ -62,11 +137,9 @@ async function ViewProdotto(req , res) {
 
         await client.connect()
 
-        const id = req.params.id
+        const query = { ...req.query }
 
-        const query = { idMobile: id }
-
-        product = await prodotti.findOne( query )
+        product = await prodotti.findOne(query)
 
     } finally {
         await client.close();
@@ -74,22 +147,40 @@ async function ViewProdotto(req , res) {
     }
 }
 
-async function ViewCarello(req , res , collection , query) {
+async function ViewCarello(req , res , query) {
+
+    let informationProducts = []
     let products = []
+    let prodotto = { }
+
     try {
 
         await client.connect()
 
-        const riepilogo =  collection.find( query )
+        let riepilogo =  carello.find( query )
         
-        products = await riepilogo.toArray()
+        informationProducts = await riepilogo.toArray()
+
+        for(i = 0 ; i < informationProducts.length ; i++){
+            prodotto = await prodotti.findOne( { idMobile: informationProducts[i].idMobile } )
+            prodotto =  { 
+                nomeMobile: prodotto.nomeMobile,
+                prezzo: prodotto.prezzo,
+                descrizioneMobile: prodotto.descrizioneMobile,
+                immagine: prodotto.linkImmagini[0],
+                quantita: informationProducts[i].quantita
+            }
+            products.push(prodotto)
+        }
+
+        res.send(products)
 
     } finally {
         await client.close();
-        res.json(products)
     }
 }
 
+/*
 async function ViewLogin(req , res){
     let  utente = { }
     try {
@@ -109,8 +200,9 @@ async function ViewLogin(req , res){
         await client.close()
     }
 }
+*/
 
-async function ViewAll(){
+async function ViewAll(req , res , collection){
     let products = []
     try {
 
@@ -131,7 +223,7 @@ async function ViewAll(){
 
 
 app.post('/Registrazione' , (req , res) => {
-    insertToDatabase(req , res , utenti).catch(console.dir)
+    insertUsers(req , res , utenti).catch(console.dir)
 })
 
 app.post('/Login' , (req , res) => {
@@ -139,37 +231,26 @@ app.post('/Login' , (req , res) => {
 })
 
 app.post('/Carello/inserimento' , (req , res) => {
-    insertToDatabase(req , res , carello ).catch(console.dir)
+    insertCarello(req , res).catch(console.dir)
 })
 
 app.get('/Carello/' , (req , res) => {
     const query = { ...req.query }
-    ViewCarello(req , res , carello ,query).catch(console.dir)
+    ViewCarello(req , res  , query).catch(console.dir)
 
 })
-
-/*
-app.get('/Carello/' , (req , res) => {
-    const query = { idUtente: req.query.idUtente , idMobile: req.query.idMobile }
-    console.log(query)
-    ViewCarello(req , res , carello , query).catch(console.dir)
-
-})
-*/
-
-app.get('/Prodotto/:id' , (req , res) => {
+app.get('/Prodotto/' , (req , res) => {
     ViewProdotto(req , res).catch(console.dir)
 })
 
-app.get('/Prodotto/all' , (req , res) => {
+app.get('/Home' , (req , res) => {
     ViewAll(req , res , prodotti).catch(console.dir)
 })
 
-app.get('/Login/' , (req , res) => {
-    ViewLogin(req , res).catch(console.dir)
-})
 
-app
+app.get('/Data/Inserimento/' , (req , res) => {
+
+} )
 
 
 

@@ -17,7 +17,12 @@ app.use(cors())
 app.use(express.urlencoded( { extended: false } ))
 app.use(express.json())
 
-function ControlObject( object1 , object2 , object3 , object4 ) {
+/*
+    * FUNCTION UTILS
+*/
+
+//controllo carello
+function ControlCarello( object1 , object2 , object3 , object4 ) {
     let cond = null
  
     if(object1 === object3 && object2 === object4){
@@ -29,13 +34,35 @@ function ControlObject( object1 , object2 , object3 , object4 ) {
     return(cond)
 }
 
+// controllo username
+// controlla la password
+
+function ControlUser( user , user1 ) {
+    let control = null
+
+    if( user === user1 ){
+        control = true       
+    } else {
+        control = false
+    }
+
+    return(control)
+}
+
+
+
+/*
+    * FUNZIONI ASSINCRONE
+*/
+
+//inserimento Utente
 async function insertUsers(req , res) {
     let control = false
 
     let users = []
     try {
 
-        await client.connect()
+        await client.connect() 
 
         let { username , password } = req.body
 
@@ -46,7 +73,7 @@ async function insertUsers(req , res) {
         users = await users.toArray()
 
         for(let i in users ){
-            control = ControlObject(username , password , users[i].username , users[i].password)
+            control = ControlUser( username , users[i].username)
             if(control == true){
                 break
             }
@@ -66,6 +93,7 @@ async function insertUsers(req , res) {
     }
 }
 
+//inserimento Carello
 async function insertCarello(req , res) {
 
     let control = false
@@ -82,7 +110,7 @@ async function insertCarello(req , res) {
 
 
         for(let i in carts ){
-            control = ControlObject(idUtente , idMobile , carts[i].idUtente , carts[i].idMobile)
+            control = ControlCarello(idUtente , idMobile , carts[i].idUtente , carts[i].idMobile)
 
             if(control === true) {
                 cart = { idUtente: idUtente , idMobile: idMobile , quantita: carts[i].quantita + req.body.quantita }
@@ -102,6 +130,8 @@ async function insertCarello(req , res) {
     }
 }
 
+
+// Controllo per il Login
 async function ControlLogin(req , res){
 
     let result = false
@@ -131,6 +161,8 @@ async function ControlLogin(req , res){
     }
 }
 
+
+// presa Prodotto Specifico
 async function ViewProdotto(req , res) {
     let product = { }
     try {
@@ -139,7 +171,7 @@ async function ViewProdotto(req , res) {
 
         const query = { ...req.query }
 
-        product = await prodotti.findOne(query)
+        product = await prodotti.findOne( { ...query } )
 
     } finally {
         await client.close();
@@ -147,6 +179,8 @@ async function ViewProdotto(req , res) {
     }
 }
 
+
+// Presa Carello per utente e per id
 async function ViewCarello(req , res , query) {
 
     let informationProducts = []
@@ -163,6 +197,7 @@ async function ViewCarello(req , res , query) {
 
         for(i = 0 ; i < informationProducts.length ; i++){
             prodotto = await prodotti.findOne( { idMobile: informationProducts[i].idMobile } )
+
             prodotto =  { 
                 nomeMobile: prodotto.nomeMobile,
                 prezzo: prodotto.prezzo,
@@ -170,6 +205,7 @@ async function ViewCarello(req , res , query) {
                 immagine: prodotto.linkImmagini[0],
                 quantita: informationProducts[i].quantita
             }
+
             products.push(prodotto)
         }
 
@@ -180,27 +216,44 @@ async function ViewCarello(req , res , query) {
     }
 }
 
-/*
-async function ViewLogin(req , res){
-    let  utente = { }
+// inserimeto Dati di acquisto
+async function insertData(req , res , idUtente) {
+
+
+    let user = { }
     try {
 
         await client.connect()
 
-        const idUtente = req.query.idUtente
-        var o_id = new ObjectId(idUtente)
+        user = await utenti.findOne( { _id: new ObjectId(idUtente) } )
 
-        console.log(idUtente)
+        if(user != null) {
+            user = await utenti.replaceOne( 
+                { _id: new ObjectId(idUtente) },
 
-        utente = await utenti.findOne( { _id: o_id } )
-
+                {
+                    ...user,
+                    indirizzo: req.body.indirizzo,
+                    stato: req.body.stato,
+                    paese: req.body.paese,
+                    provincia: req.body.provincia,
+                    modPagamento: req.body.modPagamento
+                }
+                
+            )
+            res.send(user)
+        } else {
+            res.send( 'Utente is not regitered')
+        }
 
     } finally {
-        res.send( utente )
         await client.close()
     }
 }
-*/
+
+
+// schermata Home
+// presa di tutti i prodotti
 
 async function ViewAll(req , res , collection){
     let products = []
@@ -220,7 +273,9 @@ async function ViewAll(req , res , collection){
     }
 }
 
-
+/*
+    * RICHIESTA HTTP E RISPOSTE
+*/
 
 app.post('/Registrazione' , (req , res) => {
     insertUsers(req , res , utenti).catch(console.dir)
@@ -247,10 +302,10 @@ app.get('/Home' , (req , res) => {
     ViewAll(req , res , prodotti).catch(console.dir)
 })
 
-
-app.get('/Data/Inserimento/' , (req , res) => {
-
-} )
+app.post('/DataAcquisto/' , (req , res) => {
+    const idUtente = req.query.idUtente
+    insertData(req , res , idUtente)
+})
 
 
 

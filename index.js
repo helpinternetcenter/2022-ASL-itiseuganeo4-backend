@@ -64,7 +64,7 @@ async function insertUsers(req , res) {
 
         await client.connect() 
 
-        let { username , password } = req.body
+        let { nome , cognome , username , password } = req.body
 
         password = md5(password)
 
@@ -80,7 +80,12 @@ async function insertUsers(req , res) {
         }
         
         if(control == false) {
-            await utenti.insertOne( { username: username , password: password } )
+            await utenti.insertOne( {
+                nome: nome,
+                cognome: cognome,
+                username: username, 
+                password: password,
+            } )
             res.send('Utente insert to Database')
         }
         else {
@@ -96,36 +101,54 @@ async function insertUsers(req , res) {
 //inserimento Carello
 async function insertCarello(req , res) {
 
-    let control = false
-    let carts = []
     let cart = { }
+    let utente = null
     try {
+        
         await client.connect();
 
         let { idUtente , idMobile } = req.body
 
-        carts =  carello.find( {  } )
+        utente = await utenti.findOne(
+            { _id: new ObjectId(idUtente) } 
+        )
+        
 
-        carts = await carts.toArray()
+        if(utente != null){
 
+            cart = await carello.findOne( { 
 
-        for(let i in carts ){
-            control = ControlCarello(idUtente , idMobile , carts[i].idUtente , carts[i].idMobile)
+                idUtente: idUtente, 
+                idMobile: idMobile 
+            } )
 
-            if(control === true) {
-                cart = { idUtente: idUtente , idMobile: idMobile , quantita: carts[i].quantita + req.body.quantita }
-                await carello.deleteMany( carts[i] )
-                await carello.insertOne( cart )
+            if( cart != null ){
+
+                await carello.updateOne ( 
+
+                    {  
+                        idUtente: idUtente,
+                        idMobile: idMobile  
+                    },
+                    {
+                        $set: {
+                            quantita: cart.quantita + req.body.quantita
+                        }
+                    }
+                )
+                res.status(200).send('update carello')
+
+            } else {
+
+                await carello.insertOne( req.body )
+                res.status(200).send(' new carello insert to Database')
             }
-        }
 
-        if(control === false) {
-            await carello.insertOne( req.body )
+        } else {
+            res.status(404).send('Utente not exist')
         }
 
     } finally {
-
-        res.send("Data insert to database")
         await client.close();
     }
 }

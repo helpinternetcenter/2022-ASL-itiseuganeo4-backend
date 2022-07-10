@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
-const{ MongoClient, ListIndexesCursor } = require('mongodb')
+const{ MongoClient } = require('mongodb')
+const data = new Date()
 var ObjectId = require('mongodb').ObjectId; 
 var md5 = require('md5')
 
@@ -314,7 +315,6 @@ async function insertOrdine ( res , id) {
 
         acquisti.forEach((item) => {
             const { idMobile , quantita } = item
-            const data = new Date()
             lista.push({ 
                 idMobile: idMobile, 
                 quantita: quantita, 
@@ -346,7 +346,12 @@ async function insertOrdine ( res , id) {
 
         await client.close();
     }
+
+    
+    
 }
+// Visualizzazione prodotti
+async function ViewOrdine( req , )
 
 /*
     * RICHIESTA HTTP E RISPOSTE
@@ -385,6 +390,11 @@ app.post('/DataAcquisto/' , (req , res) => {
 app.post('/Ordini/' , (req , res) => {
     const idUtente = req.query.idUtente
     insertOrdine( res , idUtente)
+})
+
+app.get('/Ordini' , (req , res) => {
+    const idUtente = req.query.idUtente
+
 })
 
 

@@ -314,11 +314,12 @@ async function insertOrdine ( res , id) {
 
         acquisti.forEach((item) => {
             const { idMobile , quantita } = item
+            const data = new Date()
             lista.push({ 
                 idMobile: idMobile, 
                 quantita: quantita, 
-                data: new Date().toLocaleDateString(),
-                ora: new Date().toLocaleTimeString()
+                data: data.toLocaleDateString(),
+                ora: data.toLocaleTimeString()
             })
         })
 

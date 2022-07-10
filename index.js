@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const{ MongoClient } = require('mongodb')
+const{ MongoClient, ListIndexesCursor } = require('mongodb')
 var ObjectId = require('mongodb').ObjectId; 
 var md5 = require('md5')
 
@@ -10,6 +10,7 @@ const database = client.db("shop")
 const utenti = database.collection("utenti")
 const carello = database.collection("carello")
 const prodotti = database.collection("prodotti")
+const ordini = database.collection("ordini")
 
 const app = express()
 
@@ -296,6 +297,56 @@ async function ViewAll(req , res , collection){
     }
 }
 
+//Schermata per gli oridini
+//presenta tutti gli ordini effettuati
+
+async function insertOrdine ( res , id) {
+
+    let ordine = { }
+    let lista = [ ]
+    let acquisti = [ ]
+
+    try {
+        await client.connect()
+
+        acquisti = carello.find({ idUtente: id })
+        acquisti = await acquisti.toArray()
+
+        acquisti.forEach((item) => {
+            const { idMobile , quantita } = item
+            lista.push({ 
+                idMobile: idMobile, 
+                quantita: quantita, 
+                data: new Date().toLocaleDateString(),
+                ora: new Date().toLocaleTimeString()
+            })
+        })
+
+        ordine = await ordini.findOne( { idUtente: id } )
+        if( ordine === null ) {
+            ordine = {
+                ordini: lista,
+                idUtente: id
+            }
+            await ordini.insertOne( ordine )
+            await carello.deleteMany( { idUtente: id })
+            res.status(200).send('new Ordine insert to Database')
+
+        } else {
+            await ordini.updateOne( 
+                { idUtente: id }, 
+                { $set: { ordini: [...ordine.ordini , ...lista ] } }
+            )
+            await carello.deleteMany( { idUtente: id })
+            res.status(200).send('update Ordine')
+        }
+
+    } finally {
+
+        await client.close();
+    }
+}
+
 /*
     * RICHIESTA HTTP E RISPOSTE
 */
@@ -328,6 +379,11 @@ app.get('/Home' , (req , res) => {
 app.post('/DataAcquisto/' , (req , res) => {
     const idUtente = req.query.idUtente
     insertData(req , res , idUtente)
+})
+
+app.post('/Ordini/' , (req , res) => {
+    const idUtente = req.query.idUtente
+    insertOrdine( res , idUtente)
 })
 
 

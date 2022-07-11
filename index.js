@@ -1,9 +1,10 @@
 const express = require('express')
 const cors = require('cors')
 const{ MongoClient } = require('mongodb')
-const data = new Date()
+const {Research , ControlUser } = require('./Utilis')
 var ObjectId = require('mongodb').ObjectId; 
 var md5 = require('md5')
+
 
 const uri = "mongodb://localhost:27017/shop"
 const client = new MongoClient(uri)
@@ -18,40 +19,6 @@ const app = express()
 app.use(cors())
 app.use(express.urlencoded( { extended: false } ))
 app.use(express.json())
-
-/*
-    * FUNCTION UTILS
-*/
-
-//controllo carello
-function ControlCarello( object1 , object2 , object3 , object4 ) {
-    let cond = null
- 
-    if(object1 === object3 && object2 === object4){
-        cond = true
-    } else {
-        cond = false
-    }
-
-    return(cond)
-}
-
-// controllo username
-// controlla la password
-
-function ControlUser( user , user1 ) {
-    let control = null
-
-    if( user === user1 ){
-        control = true       
-    } else {
-        control = false
-    }
-
-    return(control)
-}
-
-
 
 /*
     * FUNZIONI ASSINCRONE
@@ -302,14 +269,16 @@ async function ViewAll(req , res , collection){
 //presenta tutti gli ordini effettuati
 
 async function insertOrdine ( res , id) {
-
-    let ordine = { }
+    let utente = { }
     let lista = [ ]
     let acquisti = [ ]
+
+    const data = new Date()
 
     try {
         await client.connect()
 
+        utente = await utenti.findOne({ _id: new ObjectId(id)})
         acquisti = carello.find({ idUtente: id })
         acquisti = await acquisti.toArray()
 
@@ -318,40 +287,60 @@ async function insertOrdine ( res , id) {
             lista.push({ 
                 idMobile: idMobile, 
                 quantita: quantita, 
-                data: data.toLocaleDateString(),
-                ora: data.toLocaleTimeString()
             })
         })
 
-        ordine = await ordini.findOne( { idUtente: id } )
-        if( ordine === null ) {
-            ordine = {
-                ordini: lista,
-                idUtente: id
-            }
-            await ordini.insertOne( ordine )
-            await carello.deleteMany( { idUtente: id })
-            res.status(200).send('new Ordine insert to Database')
-
+        if((lista.length) === 0){
+            res.status(404).send('Carello is empty')
         } else {
-            await ordini.updateOne( 
-                { idUtente: id }, 
-                { $set: { ordini: [...ordine.ordini , ...lista ] } }
-            )
+            await ordini.insertOne({
+                ordini: lista,
+                idUtente: id,
+                indirizzo: utente.indirizzo,
+                stato: utente.stato,
+                paese: utente.paese,
+                ore: data.toLocaleTimeString(),
+                data: data.toLocaleDateString()
+            })
             await carello.deleteMany( { idUtente: id })
-            res.status(200).send('update Ordine')
+            res.status(200).send('You have just done a new order')
         }
 
     } finally {
 
         await client.close();
     }
-
-    
-    
 }
-// Visualizzazione prodotti
-async function ViewOrdine( req , )
+
+//ViualizzaProdotto
+
+async function ViewProdotto(res, idUtente) {
+
+    let products = []
+    let orders = []
+    try {
+
+        await client.connect()
+
+        orders = ordini.find( { idUtente: idUtente} )
+        orders = await orders.toArray()
+
+        orders.forEach((order) => {
+            order.ordini.forEach((item) => {
+                products.push(Research(item , order.data , order.ore))
+            })
+        })
+
+        Promise.all(products).then((values) => {
+            res.send(values)
+        })
+
+         
+    } finally {
+        await client.close()
+    }
+}
+
 
 /*
     * RICHIESTA HTTP E RISPOSTE
@@ -389,12 +378,11 @@ app.post('/DataAcquisto/' , (req , res) => {
 
 app.post('/Ordini/' , (req , res) => {
     const idUtente = req.query.idUtente
-    insertOrdine( res , idUtente)
+    insertOrdine( res , idUtente).catch(console.dir)
 })
 
-app.get('/Ordini' , (req , res) => {
-    const idUtente = req.query.idUtente
-
+app.get('/Ordine/' , (req , res) => {
+    ViewProdotto( res , req.query.idUtente ).catch(console.dir)
 })
 
 

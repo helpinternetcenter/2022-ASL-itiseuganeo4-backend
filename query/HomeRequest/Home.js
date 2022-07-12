@@ -4,20 +4,19 @@ const client = new MongoClient(uri)
 const database = client.db("shop")
 const prodotti = database.collection("prodotti")
 
-var ViewProdotto = async function( req , res ) {
-    let product = { }
+const home = async function (req , res ){
+    let products = []
     try {
-
         await client.connect()
 
-        const query = { idMobile: req.query.idMobile }
-
-        product = await prodotti.findOne( { ...query } )
+        const riepilogo =  prodotti.find( { } )
+        
+        products = await riepilogo.toArray()
 
     } finally {
         await client.close();
-        res.json(product)
+        res.json(products)
     }
 }
 
-exports.ViewProdotto = ViewProdotto
+exports.home = home

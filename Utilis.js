@@ -6,7 +6,7 @@ const prodotti = database.collection("prodotti")
 
 
 //ricerca tramite idUtente
-var Research = async function ( item , data , ora ) {
+const research = async function ( item , data , ora ) {
 
         var prodotto = await prodotti.findOne( { idMobile: item.idMobile } )
         const { linkImmagini , prezzo , nomeMobile , descrizioneMobile } = prodotto
@@ -15,37 +15,11 @@ var Research = async function ( item , data , ora ) {
             image: linkImmagini[0],
             descrizione: descrizioneMobile,
             prezzo: prezzo,
-            ora: ora,
-            data: data,
+            ora,
+            data,
             quantita: item.quantita 
         }
         return( prodotto )
 }
-// controllo username
-var ControlUser = function( user , user1) {
-    let control = null
 
-    if( user === user1 ){
-        control = true       
-    } else {
-        control = false
-    }
-
-    return(control)
-}
-
-var Research = async function ( item ){
-    var prodotto = await prodotti.findOne( { idMobile: item.idMobile } )
-    const { linkImmagini , prezzo , nomeMobile , descrizioneMobile } = prodotto
-    prodotto = {
-        nomeMobile: nomeMobile,
-        image: linkImmagini[0],
-        descrizione: descrizioneMobile,
-        prezzo: prezzo,
-        quantita: item.quantita 
-    }
-    return( prodotto )
-}
-
-exports.Research = Research
-exports.ControlUser = ControlUser
+exports.research = research

@@ -5,7 +5,7 @@ const database = client.db("shop")
 const utenti = database.collection("utenti")
 var md5 = require('md5')
 
-var ControlLogin = async function (req , res){
+const controlLogin = async function (req , res){
 
     let result = false
     let users = { }
@@ -31,4 +31,4 @@ var ControlLogin = async function (req , res){
     }
 }
 
-exports.ControlLogin = ControlLogin
+exports.controlLogin = controlLogin

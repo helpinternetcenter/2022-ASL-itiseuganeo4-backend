@@ -3,9 +3,9 @@ const uri = "mongodb://localhost:27017/shop"
 const client = new MongoClient(uri)
 const database = client.db("shop")
 const ordini = database.collection("ordini")
-const { Research } = require('../Utilis')
+const { research } = require('../../Utilis')
 
-var ViewOrdini = async function ( req , res ){
+const viewOrdini = async function ( req , res ){
 
     let products = []
     let orders = []
@@ -19,9 +19,7 @@ var ViewOrdini = async function ( req , res ){
 
         orders.forEach((order) => {
             order.ordini.forEach((item) => {
-                console.log(order.data)
-                console.log(order.ore)
-                products.push(Research(item , order.data , order.ore))
+                products.push(research(item , order.data , order.ore))
             })
         })
 
@@ -34,4 +32,4 @@ var ViewOrdini = async function ( req , res ){
     }
 }
 
-exports.ViewOrdini = ViewOrdini
+exports.viewOrdini = viewOrdini

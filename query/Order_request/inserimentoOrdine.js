@@ -7,7 +7,7 @@ const carello = database.collection("carello")
 const ordini = database.collection("ordini")
 var ObjectId = require('mongodb').ObjectId; 
 
-var insertOrdine = async function ( req , res ) {
+const insertOrdine = async function ( req , res ) {
     let utente = { }
     let lista = [ ]
     let acquisti = [ ]

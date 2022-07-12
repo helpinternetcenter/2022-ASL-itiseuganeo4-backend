@@ -21,8 +21,6 @@ var Research = async function ( item , data , ora ) {
         }
         return( prodotto )
 }
-
-
 // controllo username
 var ControlUser = function( user , user1) {
     let control = null
@@ -34,6 +32,19 @@ var ControlUser = function( user , user1) {
     }
 
     return(control)
+}
+
+var Research = async function ( item ){
+    var prodotto = await prodotti.findOne( { idMobile: item.idMobile } )
+    const { linkImmagini , prezzo , nomeMobile , descrizioneMobile } = prodotto
+    prodotto = {
+        nomeMobile: nomeMobile,
+        image: linkImmagini[0],
+        descrizione: descrizioneMobile,
+        prezzo: prezzo,
+        quantita: item.quantita 
+    }
+    return( prodotto )
 }
 
 exports.Research = Research

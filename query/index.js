@@ -5,7 +5,7 @@ const {insertOrdine} = require('./Order_request/inserimentoOrdine')
 const {controlLogin} = require('./Login_request/Login')
 const {viewProdotto} = require('./ProdottoRequest/Prodotto')
 const {insertUsers} = require('./Registrazione_request/Registrazione')
-const {ViewCarello} = require('./Car_request/RiepilogoCarello')
+const {viewCarello} = require('./Car_request/RiepilogoCarello')
 const {viewOrdini} = require('./Order_request/RiepilogoOrdini')
 
 const Request = {
@@ -16,7 +16,7 @@ const Request = {
     controlLogin,
     viewProdotto,
     insertUsers,
-    ViewCarello,
+    viewCarello,
     viewOrdini
 }
 

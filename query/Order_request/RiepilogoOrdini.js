@@ -3,7 +3,7 @@ const uri = "mongodb://localhost:27017/shop"
 const client = new MongoClient(uri)
 const database = client.db("shop")
 const ordini = database.collection("ordini")
-const { research } = require('../../Utilis')
+const { research } = require('../../Utils/Utilis')
 
 const viewOrdini = async function ( req , res ){
 
@@ -19,7 +19,14 @@ const viewOrdini = async function ( req , res ){
 
         orders.forEach((order) => {
             order.ordini.forEach((item) => {
-                products.push(research(item , order.data , order.ore))
+                products.push(research({
+                    ...item,
+                    data: order.data,
+                    ore: order.ore,
+                    stato: order.stato,
+                    paese: order.paese,
+                    indirizzo: order.indirizzo
+                }))
             })
         })
 

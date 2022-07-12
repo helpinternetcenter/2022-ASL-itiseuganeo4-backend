@@ -3,7 +3,7 @@ const uri = "mongodb://localhost:27017/shop"
 const client = new MongoClient(uri)
 const database = client.db("shop")
 const carello = database.collection("carello")
-const { research } = require('../../Utilis')
+const { research } = require('../../Utils/Utilis')
 
 const viewCarello = async function ( req , res ) {
 
@@ -31,4 +31,4 @@ const viewCarello = async function ( req , res ) {
     }
 }
 
-exports.ViewCarello = viewCarello
+exports.viewCarello = viewCarello

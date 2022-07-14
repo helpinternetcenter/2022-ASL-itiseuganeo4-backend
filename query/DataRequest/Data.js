@@ -5,7 +5,7 @@ const database = client.db("shop")
 const utenti = database.collection("utenti")
 var ObjectId = require('mongodb').ObjectId; 
 
-var insertData = async function ( req , res ){
+const insertData = async function ( req , res ){
     let user = { }
     const { idUtente } = req.query
     try {

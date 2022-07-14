@@ -4,9 +4,9 @@ const client = new MongoClient(uri)
 const database = client.db("shop")
 const utenti = database.collection("utenti")
 
-var md5 = require('md5')
+const md5 = require('md5')
 
-var insertUsers = async function (req , res) {
+const insertUsers = async function (req , res) {
 
     let user = { }
     try {

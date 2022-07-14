@@ -3,9 +3,9 @@ const uri = "mongodb://localhost:27017/shop"
 const client = new MongoClient(uri)
 const database = client.db("shop")
 const carello = database.collection("carello")
-const { Research } = require('../Utilis')
+const { research } = require('../../Utils/Utilis')
 
-var ViewCarello = async function ( req , res ) {
+const viewCarello = async function ( req , res ) {
 
     let riepilogo = []
     let products = []
@@ -19,7 +19,7 @@ var ViewCarello = async function ( req , res ) {
         riepilogo = await riepilogo.toArray()
 
         riepilogo.forEach((item) => {
-            products.push(Research(item))
+            products.push(research(item))
         })
 
         Promise.all(products).then((values) => {
@@ -31,4 +31,4 @@ var ViewCarello = async function ( req , res ) {
     }
 }
 
-exports.ViewCarello = ViewCarello
+exports.viewCarello = viewCarello

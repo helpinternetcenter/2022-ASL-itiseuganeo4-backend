@@ -23,10 +23,17 @@ var insertUsers = async function (req , res) {
                 username: username, 
                 password: password,
             } )
-            res.send('Utente insert to Database')
+            res.send({
+                result: true,
+                text: 'Utente inserito correttamente'
+            })
         }
         else {
-            res.send('Utente already exist')
+            res.send({
+                result: false,
+                text: 'Username gia esistente'
+            }
+            )
         }
 
     } finally {

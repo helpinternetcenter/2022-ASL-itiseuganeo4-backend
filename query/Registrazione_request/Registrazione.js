@@ -15,15 +15,28 @@ const insertUsers = async function (req, res) {
     user = await utenti.findOne({ username: username })
 
     if (user === null) {
-      await utenti.insertOne({
-        nome: nome,
-        cognome: cognome,
-        username: username,
-        password: password
-      })
-      res.send('Utente insert to Database')
+      if (user.nome === '' || user.cognome === '' || user.username === '' || user.password === '') {
+        res.send({
+          bool: false,
+          response: 'Campi obbligatori'
+        })
+      } else {
+        await utenti.insertOne({
+          nome: nome,
+          cognome: cognome,
+          username: username,
+          password: password
+        })
+        res.send({
+          bool: true,
+          response: 'Utente inserito correttamente'
+        })
+      }
     } else {
-      res.send('Utente already exist')
+      res.send({
+        bool: false,
+        response: 'username gia inserito'
+      })
     }
   } finally {
     await client.close()

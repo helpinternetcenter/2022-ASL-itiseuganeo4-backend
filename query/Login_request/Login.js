@@ -22,9 +22,15 @@ const controlLogin = async function (req, res) {
   } finally {
     await client.close()
     if (result === true) {
-      res.send('Welcome to Project z')
+      res.send({
+        entered: true,
+        idUtente: users._id
+      })
     } else {
-      res.status(400).send('Users is not registered')
+      res.status(400).send({
+        entered: false,
+        idUtente: null
+      })
     }
   }
 }

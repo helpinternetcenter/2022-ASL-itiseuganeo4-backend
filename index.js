@@ -15,7 +15,7 @@ app.post('/Carello/inserimento', (req, res) => { Request.insertCarello(req, res)
 
 app.get('/Carello/', (req, res) => { Request.viewCarello(req, res) })
 
-app.get('/Prodotto/', (req, res) => { Request.viewProdotto(req, res) })
+app.get('/prodotto/', (req, res) => { Request.viewProdotto(req, res) })
 
 app.get('/Home', (req, res) => { Request.home(req, res) })
 

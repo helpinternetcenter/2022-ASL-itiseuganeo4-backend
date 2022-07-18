@@ -15,9 +15,9 @@ const insertUsers = async function (req, res) {
     user = await utenti.findOne({ username: username })
 
     if (user === null) {
-      if (user.nome === '' || user.cognome === '' || user.username === '' || user.password === '') {
+      if (nome === '' || cognome === '' || username === '' || password === '') {
         res.send({
-          bool: false,
+          result: false,
           response: 'Campi obbligatori'
         })
       } else {
@@ -27,15 +27,15 @@ const insertUsers = async function (req, res) {
           username: username,
           password: password
         })
-        res.send({
-          bool: true,
-          response: 'Utente inserito correttamente'
-        })
       }
+      res.send({
+        result: true,
+        text: ''
+      })
     } else {
       res.send({
-        bool: false,
-        response: 'username gia inserito'
+        result: false,
+        text: 'username gia inserito'
       })
     }
   } finally {

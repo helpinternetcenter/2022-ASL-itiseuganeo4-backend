@@ -22,6 +22,7 @@ const controlLogin = async function (req, res) {
   } finally {
     await client.close()
     if (result === true) {
+      console.log('sei dentro', users._id)
       res.send({
         entered: true,
         idUtente: users._id

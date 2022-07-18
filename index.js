@@ -25,4 +25,6 @@ app.post('/Ordini/', (req, res) => { Request.insertOrdine(req, res) })
 
 app.get('/Ordine/', (req, res) => { Request.viewOrdini(req, res) })
 
+app.get('/idUtente/', (req, res) => { Request.viewId(req, res) })
+
 app.listen(3000)

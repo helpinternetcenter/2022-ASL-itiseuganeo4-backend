@@ -7,6 +7,7 @@ const { viewProdotto } = require('./ProdottoRequest/Prodotto')
 const { insertUsers } = require('./Registrazione_request/Registrazione')
 const { viewCarello } = require('./Car_request/RiepilogoCarello')
 const { viewOrdini } = require('./Order_request/RiepilogoOrdini')
+const { viewId } = require('./idUtenteRequest/idUtente')
 
 const Request = {
   home,
@@ -17,7 +18,8 @@ const Request = {
   viewProdotto,
   insertUsers,
   viewCarello,
-  viewOrdini
+  viewOrdini,
+  viewId
 }
 
 exports.Request = Request

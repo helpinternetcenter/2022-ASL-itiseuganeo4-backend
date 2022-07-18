@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb')
+const { MongoClient, ObjectId } = require('mongodb')
 const uri = 'mongodb://localhost:27017/shop'
 const client = new MongoClient(uri)
 const database = client.db('shop')
@@ -9,10 +9,10 @@ const viewId = async function (req, res) {
 
   try {
     await client.connect()
-
-    const query = { username: req.query.username }
+    const query = { _id: ObjectId(req.query.id) }
 
     user = await utenti.findOne({ ...query })
+    delete user.password
   } finally {
     await client.close()
     res.json(user)

@@ -6,6 +6,7 @@ const utenti = database.collection('utenti')
 var ObjectId = require('mongodb').ObjectId
 
 const insertData = async function (req, res) {
+  console.log(req)
   let user = { }
   const { idUtente } = req.query
   try {
@@ -24,6 +25,7 @@ const insertData = async function (req, res) {
         }
 
       )
+      console.log(user)
       res.send(user)
     } else {
       res.send('Utente is not regitered')

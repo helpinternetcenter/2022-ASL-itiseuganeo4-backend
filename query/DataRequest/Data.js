@@ -22,8 +22,8 @@ const insertData = async function (req, res) {
           paese: req.body.paese,
           provincia: req.body.provincia,
           modPagamento: req.body.modPagamento
-        }
 
+        }
       )
       console.log(user)
       res.send(user)

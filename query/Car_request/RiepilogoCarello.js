@@ -22,6 +22,7 @@ const viewCarello = async function (req, res) {
 
     Promise.all(products).then((values) => {
       res.send(values)
+      console.log(values)
     })
   } finally {
     await client.close()

@@ -8,6 +8,7 @@ const research = async function (item) {
   var prodotto = await prodotti.findOne({ idMobile: item.idMobile })
   const { linkImmagini, prezzo, nomeMobile, descrizioneMobile } = prodotto
   const { quantita, indirizzo, ore, data, stato, paese } = item
+
   prodotto = {
     nomeMobile: nomeMobile,
     image: linkImmagini[0],
